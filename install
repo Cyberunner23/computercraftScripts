@@ -3,20 +3,18 @@
 -----------------------------------------------------------
 
 local remoteScriptListLink   = "https://raw.githubusercontent.com/Cyberunner23/computercraftScripts/master/scriptList"
-local remoteScriptList       = nil
 local remoteScriptListParsed = {}
-local localScriptList        = nil
 local localScriptListParsed  = {}
 
 -----------------------------------------------------------
 --------------------- Util Functions ----------------------
 -----------------------------------------------------------
-parseScriptList(scriptListString)
+parseScriptList(scriptList)
   scriptListParsed = {}
   while true do
-    local scriptName = scriptListString.readLine()
+    local scriptName = scriptList.readLine()
     if scriptName ~= nil then
-      scriptNameParsed[scriptName]["scriptVersion"] = scriptListString.readLine()
+      scriptNameParsed[scriptName]["scriptVersion"] = scriptList.readLine()
     else
       break
     end
@@ -29,7 +27,7 @@ end
 -----------------------------------------------------------
 
 --Get script list from repo
-local remoteScriptList      = http.get(remoteScriptListLink).readAll()
+local remoteScriptList      = http.get(remoteScriptListLink)
 
 if not remoteScriptList then
   error("Could not download the script list from the repo. Exiting...")
@@ -60,10 +58,8 @@ if fileHandle == nil then
   error("Could not open the local script list. Something went horribly wrong. Exiting...")
 end
 
-localScriptList = fileHandle.readAll()
-
 --Parse local script list
-localScriptListParsed = parseScriptList(localScriptList)
+localScriptListParsed = parseScriptList(fileHandle)
 
 
 
