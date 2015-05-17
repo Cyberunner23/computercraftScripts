@@ -1,0 +1,37 @@
+--[[ 
+  Made By: Jerimo
+  
+  RegButton makes a button and adds it to the 
+  supplied table, in the format that CheckClick 
+  uses.
+    RegButton(Button list, Button Title, callback 
+    function, X position, Y position, width, 
+    height, Text color, BackGround Color)
+      Returns true if the button was added
+  CheckClick takes the button list, and the x and 
+  y position of the click and checks against the 
+  list
+    CheckClick(Button list, Click X position, 
+    Click Y position)
+      Returns the function of the button that was 
+      touched, or false
+--]]
+
+function RegButton(BList, BTitle, CBack, XPos, YPos, Width, Height, TColor, BGColor)
+  CurButton = {}
+  CurButton.Title, CurButton.CBack, CurButton.XPos, CurButton.YPos, CurButton.Width, CurButton.Height, CurButton.TColor, CurButton.BGColor = BTitle, CBack, XPos, YPos, Width, Height, TColor, BGColor
+  CurButton.XEnd, CurButton.YEnd = CurButton.XPos + CurButton.Width, CurButton.YPos + CurButton.Height
+  table.insert(BList, CurButton)
+  CurButton = nil
+  return true
+end
+
+function CheckClick(BList, ClkX, ClkY)
+  for local i = 1, #BList do
+    if ClkX >= BList[i].XPos and ClkY >= BList[i].YPos and ClkX <= BList[i].XEnd and ClkY <= BList[i].YEnd then
+      return true
+    else
+      return false
+    end
+  end
+end
