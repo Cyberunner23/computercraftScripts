@@ -65,7 +65,7 @@ function downloadScript(scriptName)
   fileHandle.write(scriptData)
   fileHandle.close()
 
-  print(Done.)
+  print("Done")
 
   addScriptToLocalScriptList(scriptName, remoteScriptListParsed[scriptName])
 
