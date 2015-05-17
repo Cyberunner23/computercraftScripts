@@ -1,31 +1,47 @@
 -----------------------------------------------------------
------------ Get And Parse Script List From Repo -----------
+----------------------- Global Vars -----------------------
 -----------------------------------------------------------
 
 local remoteScriptListLink   = "https://raw.githubusercontent.com/Cyberunner23/computercraftScripts/master/scriptList"
-local remoteScriptList        = nil
+local remoteScriptList       = nil
 local remoteScriptListParsed = {}
 local localScriptList        = nil
 local localScriptListParsed  = {}
 
+-----------------------------------------------------------
+--------------------- Util Functions ----------------------
+-----------------------------------------------------------
+parseScriptList(scriptListString)
+  scriptListParsed = {}
+  while true do
+    local scriptName = scriptListString.readLine()
+    if scriptName ~= nil then
+      scriptNameParsed[scriptName]["scriptVersion"] = scriptListString.readLine()
+    else
+      break
+    end
+  end
+  return scriptListParsed
+end
+
+-----------------------------------------------------------
+----------- Get And Parse Script List From Repo -----------
+-----------------------------------------------------------
+
 --Get script list from repo
-local remoteScriptList      = http.get(scriptListLink).readAll()
+local remoteScriptList      = http.get(remoteScriptListLink).readAll()
 
 if not remoteScriptList then
   error("Could not download the script list from the repo. Exiting...")
 end
 
 --Parse remote script list
---TODO: parse the list
+--remoteScriptListParsed = parseScriptList(remoteScriptList)
 
---test
-print(remoteScriptList)
 
 -----------------------------------------------------------
 --- Check If The Local Script List Exists And Parse It ---
 -----------------------------------------------------------
-
-
 
 --Check if the dir exists, if not make one
 if not fs.isDir("ScriptList") then
@@ -39,7 +55,7 @@ if not fs.exists("ScriptList/ScriptList.txt") then
 end
 
 --Open and read local script list
-local fileHandle = fs.open("ScriptList/ScriptList.txt")
+local fileHandle = fs.open("ScriptList/ScriptList.txt", "r")
 if fileHandle == nil then
   error("Could not open the local script list. Something went horribly wrong. Exiting...")
 end
@@ -47,7 +63,7 @@ end
 localScriptList = fileHandle.readAll()
 
 --Parse local script list
-
+localScriptListParsed = parseScriptList(localScriptList)
 
 
 
