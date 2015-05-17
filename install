@@ -13,8 +13,8 @@ function parseScriptList(scriptList)
   scriptListParsed = {}
   while true do
     local scriptName = scriptList.readLine()
-    if scriptName ~= nil then
-      scriptNameParsed[scriptName]["scriptVersion"] = scriptList.readLine()
+    if not scriptName then
+      scriptListParsed[scriptName]["scriptVersion"] = scriptList.readLine()
     else
       break
     end
@@ -27,7 +27,7 @@ end
 -----------------------------------------------------------
 
 --Get script list from repo
-local remoteScriptList      = http.get(remoteScriptListLink)
+local remoteScriptList = http.get(remoteScriptListLink)
 
 if not remoteScriptList then
   error("Could not download the script list from the repo. Exiting...")
