@@ -136,9 +136,9 @@ print("Done.")
 
 
 
----------------------------------------------------
-- Check If There Is A Difference Between Local And Remote -
----------------------------------------------------
+-------------------------------------------------------------
+-- Check If There Is A Difference Between Local And Remote --
+-------------------------------------------------------------
 
 for k,v in pairs(remoteScriptParsed) do
   if ScriptListParsed[k] and number(ScriptListParsed[k].version) < number(remoteScriptParsed[k].version) then
