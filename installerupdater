@@ -1,0 +1,14 @@
+
+link    = "https://raw.githubusercontent.com/Cyberunner23/computercraftScripts/master/install"
+content = http.get(link).readAll()
+
+if not content then
+  error("Could not connect to github.")
+end
+
+fs.delete("install")
+f = fs.open("install", "w")
+f.write(content)
+f.close()
+
+print("Done updating the installer.")
