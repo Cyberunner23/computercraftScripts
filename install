@@ -22,24 +22,74 @@ function parseScriptList(scriptList)
   return scriptListParsed
 end
 
------------------------------------------------------------
------------ Get And Parse Script List From Repo -----------
------------------------------------------------------------
+function writeScriptList(parsedScriptList)
 
---Get script list from repo
-local remoteScriptList = http.get(remoteScriptListLink)
+  local fileHandle = fs.open("ScriptList/ScriptList.txt", "w")
+  if fileHandle == nil then
+    error("Could not open the local script list for writing. Something went very bad. Exiting...")
+  end
 
-if not remoteScriptList then
-  error("Could not download the script list from the repo. Exiting...")
+  for k,v in pairs(parsedScriptList) do
+    fileHandle.write(parsedScriptList[k])
+    fileHandle.write(parsedScriptList[k].version)
+  end
+
 end
 
---Parse remote script list
---remoteScriptListParsed = parseScriptList(remoteScriptList)
+function addScriptToLocalScriptList(scriptName, scriptVersion)
+  localScriptListParsed[scriptName].version = scriptVersion
+  writeScriptList(localScriptListParsed)
+end
+
+function removeScriptFromLocalScriptList(scriptName)
+  localScriptListParsed[scriptName] = nil
+  writeScriptList(localScriptListParsed)
+end
+
+function downloadScript(scriptName)
+
+  print("Downloading script...")
+
+  local scriptLink = "https://raw.githubusercontent.com/Cyberunner23/computercraftScripts/master/" + scriptName
+  local scriptData = http.get(scriptLink).readAll()
+  local fileHandle = nil
+
+  if not scriptData then
+    error("Could not download the script from the repo. Exiting...")
+  end
+
+  print("Done.")
+  print("Writing script...")
+
+  fileHandle = fs.open(scriptName, "w")
+  fileHandle.write(scriptData)
+  fileHandle.close()
+
+  print(Done.)
+
+  addScriptToLocalScriptList(scriptName, remoteScriptListParsed[scriptName])
+
+end
+
+function deleteScript(scriptName)
+  removeScriptFromLocalScriptList(scriptName)
+  fs.delete(scriptName)
+end
+
+function updateScript(scriptName)
+  print("Deleting old version of " ..scriptName.. " ")
+  deleteScript(scriptName)
+  print("Downloading new version of " ..scriptName.. " ")
+  downloadScript(scriptName)
+  print("Done.")
+end
 
 
 -----------------------------------------------------------
 --- Check If The Local Script List Exists And Parse It ---
 -----------------------------------------------------------
+
+print("Reading local script list...")
 
 --Check if the dir exists, if not make one
 if not fs.isDir("ScriptList") then
@@ -48,6 +98,7 @@ end
 
 --Check if the local script list exists, if not make a blank one for now.
 if not fs.exists("ScriptList/ScriptList.txt") then
+  print("Local script list not found... Making one.")
   local tmpFileHandle = fs.open("ScriptList/ScriptList.txt", "w")
   tmpFileHandle.close()
 end
@@ -61,10 +112,40 @@ end
 --Parse local script list
 localScriptListParsed = parseScriptList(fileHandle)
 
+--TODO: check if some scripts are missing compared to the local file
+
+
+-----------------------------------------------------------
+----------- Get And Parse Script List From Repo -----------
+-----------------------------------------------------------
+
+print("Getting remote script list...")
+
+--Get script list from repo
+local remoteScriptList = http.get(remoteScriptListLink)
+
+if not remoteScriptList then
+  error("Could not download the script list from the repo. Exiting...")
+end
+
+--Parse remote script list
+--remoteScriptListParsed = parseScriptList(remoteScriptList)
+
+print("Done.")
 
 
 
---TODO: check if scripts need updating, if so suggest user to update.
+
+---------------------------------------------------
+- Check If There Is A Difference Between Local And Remote -
+---------------------------------------------------
+
+for k,v in pairs(remoteScriptParsed) do
+  if ScriptListParsed[k] and number(ScriptListParsed[k].version) < number(remoteScriptParsed[k].version) then
+    --TODO: aks user if update is wanted and do it if so
+  end
+end
+
 
 --TODO: Show list of available scripts ans prompt user for which one is wanted.
 
