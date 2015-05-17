@@ -77,9 +77,9 @@ function deleteScript(scriptName)
 end
 
 function updateScript(scriptName)
-  print("Deleting old version of " ..scriptName.. " ")
+  print("Deleting old version of " ..scriptName..)
   deleteScript(scriptName)
-  print("Downloading new version of " ..scriptName.. " ")
+  print("Downloading new version of " ..scriptName..)
   downloadScript(scriptName)
   print("Done.")
 end
