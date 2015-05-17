@@ -9,7 +9,7 @@ local localScriptListParsed  = {}
 -----------------------------------------------------------
 --------------------- Util Functions ----------------------
 -----------------------------------------------------------
-parseScriptList(scriptList)
+function parseScriptList(scriptList)
   scriptListParsed = {}
   while true do
     local scriptName = scriptList.readLine()
