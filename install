@@ -18,6 +18,9 @@ end
 --Parse remote script list
 --TODO: parse the list
 
+--test
+print(remoteScriptList)
+
 -----------------------------------------------------------
 --- Check If The Local Script List Exists And Parse It ---
 -----------------------------------------------------------
