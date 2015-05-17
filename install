@@ -1,10 +1,30 @@
 -----------------------------------------------------------
--------------------------- UPDATE -------------------------
+----------- Get And Parse Script List From Repo -----------
 -----------------------------------------------------------
 
---Check if there is a local script list, if not make one.
+local remoteScriptListLink   = "https://raw.githubusercontent.com/Cyberunner23/computercraftScripts/master/scriptList"
+local remoteScripList        = nil
+local remoteScriptListParsed = {}
+local localScriptList        = nil
+local localScriptListParsed  = {}
 
---Check if the fir exists, if not make one
+--Get script list from repo
+local remoteScripList      = http.get(scriptListLink).readAll()
+
+if not remoteScripList then
+  error("Could not download the script list from the repo. Exiting...")
+end
+
+--Parse remote script list
+--TODO: parse the list
+
+-----------------------------------------------------------
+--- Check If The Local Script List Exists And Parse It ---
+-----------------------------------------------------------
+
+
+
+--Check if the dir exists, if not make one
 if not fs.isDir("ScriptList") then
   fs.makeDir("ScriptList")
 end
@@ -14,4 +34,23 @@ if not fs.exists("ScriptList/ScriptList.txt") then
   local tmpFileHandle = fs.open("ScriptList/ScriptList.txt", "w")
   tmpFileHandle.close()
 end
+
+--Open and read local script list
+local fileHandle = fs.open("ScriptList/ScriptList.txt")
+if fileHandle == nil then
+  error("Could not open the local script list. Something went horribly wrong. Exiting...")
+end
+
+localScriptList = fileHandle.readAll()
+
+--Parse local script list
+
+
+
+
+
+--TODO: check if scripts need updating, if so suggest user to update.
+
+--TODO: Show list of available scripts ans prompt user for which one is wanted.
+
 
