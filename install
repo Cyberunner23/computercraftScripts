@@ -11,7 +11,7 @@ end
 
 --Check if the local script list exists, if not make a blank one for now.
 if not fs.exists("ScriptList/ScriptList.txt") then
-  local tmpFileHandle = fs.open("ScriptList.txt", "w")
+  local tmpFileHandle = fs.open("ScriptList/ScriptList.txt", "w")
   tmpFileHandle.close()
 end
 
