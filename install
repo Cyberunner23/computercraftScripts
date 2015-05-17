@@ -1,0 +1,17 @@
+-----------------------------------------------------------
+-------------------------- UPDATE -------------------------
+-----------------------------------------------------------
+
+--Check if there is a local script list, if not make one.
+
+--Check if the fir exists, if not make one
+if not fs.isDir("ScriptList") then
+  fs.makeDir("ScriptList")
+end
+
+--Check if the local script list exists, if not make a blank one for now.
+if not fs.exists("ScriptList/ScriptList.txt") then
+  local tmpFileHandle = fs.open("ScriptList.txt", "w")
+  tmpFileHandle.close()
+end
+
