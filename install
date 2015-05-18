@@ -1,3 +1,4 @@
+
 -----------------------------------------------------------
 ----------------------- Global Vars -----------------------
 -----------------------------------------------------------
@@ -13,10 +14,12 @@ function parseScriptList(scriptList)
   scriptListParsed = {}
   while true do
     local scriptName = scriptList.readLine()
-    if scriptName then
-      scriptListParsed[scriptName]["scriptVersion"] = scriptList.readLine()
-    else
+    --if scripName not empty then read next line and set it as version
+    if scriptName == "" or scriptName == nil then
       break
+    else
+      scriptListParsed[scriptName] = {}
+      scriptListParsed[scriptName]["scriptVersion"] = scriptList.readLine()
     end
   end
   return scriptListParsed
@@ -37,7 +40,8 @@ function writeScriptList(parsedScriptList)
 end
 
 function addScriptToLocalScriptList(scriptName, scriptVersion)
-  localScriptListParsed[scriptName].version = scriptVersion
+  localScriptListParsed[scriptName] = {}
+  localScriptListParsed[scriptName].scriptVersion = scriptVersion
   writeScriptList(localScriptListParsed)
 end
 
@@ -50,7 +54,7 @@ function downloadScriptRaw(scriptName)
 
   print("Downloading script...")
 
-  local scriptLink   = "https://raw.githubusercontent.com/Cyberunner23/computercraftScripts/master/" + scriptName
+  local scriptLink   = "https://raw.githubusercontent.com/Cyberunner23/computercraftScripts/master/" .. scriptName
   local scriptHandle = http.get(scriptLink)
   local scriptData   = scriptHandle.readAll()
   local fileHandle   = nil
@@ -72,7 +76,7 @@ end
 
 function downloadScript(scriptName)
   downloadScriptRaw(scriptName)
-  addScriptToLocalScriptList(scriptName, remoteScriptListParsed[scriptName].version)
+  addScriptToLocalScriptList(scriptName, remoteScriptListParsed[scriptName].scriptVersion)
 end
 
 function deleteScript(scriptName)
@@ -103,7 +107,7 @@ if not remoteScriptList then
 end
 
 --Parse remote script list
---remoteScriptListParsed = parseScriptList(remoteScriptList)
+remoteScriptListParsed = parseScriptList(remoteScriptList)
 
 print("Done.")
 
@@ -150,10 +154,10 @@ function askYesNoQuestion(msg, yesAction, noAction)
 
     local input = read()
 
-    if input.lower() == "yes" or input.lower() == "y" then
+    if string.lower(input) == "yes" or string.lower(input) == "y" then
       yesAction()
       break
-    elseif input.lower() == "no" or input.lower() == "n" then
+    elseif string.lower(input) == "no" or string.lower(input) == "n" then
       noAction()
       break
     else
@@ -171,7 +175,7 @@ end
 
 function onDownloadAllMissingScriptsAccepted()
   for i = 1, #missingScripts do
-    removeScriptFromLocalScriptList(missingScript[i])
+    removeScriptFromLocalScriptList(missingScripts[i]) -- dat typo doe
     downloadScript(missingScripts[i])
   end
 end
@@ -226,7 +230,7 @@ for k,v in pairs(localScriptListParsed) do
     table.insert(missingScripts, k)
   end
 end
-
+--thi is redundant, the check I jsut wrote takes care of this what check?
 if #missingScripts ~= 0 then
 
   print("Some scripts that the local script list indicate as being installed are missing.")
@@ -239,7 +243,6 @@ if #missingScripts ~= 0 then
 
   local question = "Do you want to download the missing scripts? (This may result in the scripts being also updated.) (yes(y) / no(n))"
   askYesNoQuestion(question, onDownloadMissingScriptsAccept, onDownloadMissingScriptsRefuse)
-
 end
 
 
@@ -247,13 +250,81 @@ end
 -- Check If There Is A Difference Between Local And Remote --
 -------------------------------------------------------------
 
-for k,v in pairs(remoteScriptListParsed) do
-  if ScriptListParsed[k] and number(ScriptListParsed[k].version) < number(remoteScriptParsed[k].version) then
-    --TODO: aks user if update is wanted and do it if so
+local outdatedScripts = {}
+
+
+function onUpdateAccept()
+
+  local question = "Do you want to update all scripts? (yes(y) / no(n))"
+  askYesNoQuestion(question, onUpdateAllAccept, onUpdateAllRefuse)
+
+  print("Done updating!")
+
+end
+
+function onUpdateAllAccept()
+
+  print("Updating all scripts...")
+
+  for i = 1, #outdatedScripts do
+    updateScript(outdatedScripts[i])
   end
+
+end
+
+function onUpdateAllRefuse()
+
+  for i = 1, #outdatedScripts do
+
+    local question = "Do you want to update: " ..outdatedScripts[i].. " (" ..localScriptListParsed[outdatedScripts[i]].scriptVersion.. " -> " ..remoteScriptListParsed[outdatedScripts[i]].scriptVersion.. ")"
+    askYesNoQuestion(question, function() updateScript(outdatedScripts[i]) end,
+                               function() print("Update for " ..outdatedScripts[i].. " has been skipped."))
+
+  end
+
 end
 
 
+function onUpdateRefused()
+  print("Skipping updates.")
+end
+
+
+print("Checking for updates...")
+
+for k, v in pairs(remoteScriptListParsed) do
+  if localScriptListParsed[k] == nil or localScriptListParsed[k].scriptVersion < remoteScriptListParsed[k].scriptVersion then
+    table.insert(outdatedScripts, k)
+  end
+end
+
+if #outdatedScripts ~= 0 then
+
+  print("Updates are available. Here is the list of updates: ")
+  for i = 1, #outdatedScripts do
+    print(outdatedScripts[i].. " (" ..localScriptListParsed[outdatedScripts[i]].scriptVersion.. " -> " ..remoteScriptListParsed[outdatedScripts[i]].scriptVersion.. ")")
+  end
+
+  local question = "Do you wan to update the scripts?"
+  askYesNoQuestion(question, onUpdateAccept, onUpdateRefused)
+
+else
+  print("All installed scripts are up to date!")
+end
+ 
 --TODO: Show list of available scripts ans prompt user for which one is wanted.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
