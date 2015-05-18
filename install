@@ -46,13 +46,14 @@ function removeScriptFromLocalScriptList(scriptName)
   writeScriptList(localScriptListParsed)
 end
 
-function downloadScript(scriptName)
+function downloadScriptRaw(scriptName)
 
   print("Downloading script...")
 
-  local scriptLink = "https://raw.githubusercontent.com/Cyberunner23/computercraftScripts/master/" + scriptName
-  local scriptData = http.get(scriptLink).readAll()
-  local fileHandle = nil
+  local scriptLink   = "https://raw.githubusercontent.com/Cyberunner23/computercraftScripts/master/" + scriptName
+  local scriptHandle = http.get(scriptLink)
+  local scriptData   = scriptHandle.readAll()
+  local fileHandle   = nil
 
   if not scriptData then
     error("Could not download the script from the repo. Exiting...")
@@ -67,8 +68,11 @@ function downloadScript(scriptName)
 
   print("Done")
 
-  addScriptToLocalScriptList(scriptName, remoteScriptListParsed[scriptName])
+end
 
+function downloadScript(scriptName)
+  downloadScriptRaw(scriptName)
+  addScriptToLocalScriptList(scriptName, remoteScriptListParsed[scriptName].version)
 end
 
 function deleteScript(scriptName)
@@ -83,6 +87,25 @@ function updateScript(scriptName)
   downloadScript(scriptName)
   print("Done.")
 end
+
+
+-----------------------------------------------------------
+----------- Get And Parse Script List From Repo -----------
+-----------------------------------------------------------
+
+print("Getting remote script list...")
+
+--Get script list from repo
+local remoteScriptList = http.get(remoteScriptListLink)
+
+if not remoteScriptList then
+  error("Could not download the script list from the repo. Exiting...")
+end
+
+--Parse remote script list
+--remoteScriptListParsed = parseScriptList(remoteScriptList)
+
+print("Done.")
 
 
 -----------------------------------------------------------
@@ -112,28 +135,112 @@ end
 --Parse local script list
 localScriptListParsed = parseScriptList(fileHandle)
 
---TODO: check if some scripts are missing compared to the local file
 
+---------------------------------------------------
+-- Check If Local Script List And Files Match Up --
+---------------------------------------------------
 
------------------------------------------------------------
------------ Get And Parse Script List From Repo -----------
------------------------------------------------------------
+local missingScripts = {}
 
-print("Getting remote script list...")
+function askYesNoQuestion(msg, yesAction, noAction)
 
---Get script list from repo
-local remoteScriptList = http.get(remoteScriptListLink)
+  print(msg)
 
-if not remoteScriptList then
-  error("Could not download the script list from the repo. Exiting...")
+  while true do
+
+    local input = read()
+
+    if input.lower() == "yes" or input.lower() == "y" then
+      yesAction()
+      break
+    elseif input.lower() == "no" or input.lower() == "n" then
+      noAction()
+      break
+    else
+      print("Please enter a valid option.")
+    end
+
+  end
+
 end
 
---Parse remote script list
---remoteScriptListParsed = parseScriptList(remoteScriptList)
+function onDownloadMissingScriptsAccept()
+  local question = "Download all scripts? (yes(y) / no(n))"
+  askYesNoQuestion(question, onDownloadAllMissingScriptsAccepted, onDownloadAllMissingScriptsRefused)
+end
 
-print("Done.")
+function onDownloadAllMissingScriptsAccepted()
+  for i = 1, #missingScripts do
+    removeScriptFromLocalScriptList(missingScript[i])
+    downloadScript(missingScripts[i])
+  end
+end
+
+function onDownloadAllMissingScriptsRefused()
+
+  for i = 1, #missingScripts do
+
+    question = "Would you like to download: " + missingScript[i] + " ? (yes(y) / no(n)"
+    askYesNoQuestion(question, function()
+                                 removeScriptFromLocalScriptList(missingScript[i])
+                                 downloadScript(missingScripts[i])
+                               end,
+                               function()
+                                 local question = "Remove it from the local script list? (yes(y) / no(n)"
+                                 askYesNoQuestion(question, function() removeScriptFromLocalScriptList(missingScript[i]) end, function() end)
+                               end)
+
+  end
+
+end
 
 
+function onDownloadMissingScriptsRefuse()
+  local question = "Do you want to remove all the scripts from the local script list?"
+  askYesNoQuestion(question, onRemoveAllScriptsFromLocalListAccept, onRemoveAllScriptsFromLocalListRefused)
+end
+
+function onRemoveAllScriptsFromLocalListAccept()
+  for i = 1, #missingScripts do
+    removeScriptFromLocalScriptList(missingScripts[i])
+  end
+end
+
+function onRemoveAllScriptsFromLocalListRefused()
+
+  for i = 1, #missingScripts do
+
+    question = "Would you like to remove: " + missingScript[i] + " from the local script list? (yes(y) / no(n)"
+    askYesNoQuestion(question, function() removeScriptFromLocalScriptList(missingScripts[i]) end,
+                               function() end)
+
+  end
+
+end
+
+
+
+--check if some scripts are missing compared to the local file
+for k,v in pairs(localScriptListParsed) do
+  if not fs.exists(k) then
+    table.insert(missingScripts, k)
+  end
+end
+
+if #missingScripts ~= 0 then
+
+  print("Some scripts that the local script list indicate as being installed are missing.")
+  print("Here is the list of missing scripts:")
+
+  for i = 1, #missingScripts do
+    print(missingScripts[i])
+  end
+
+
+  local question = "Do you want to download the missing scripts? (This may result in the scripts being also updated.) (yes(y) / no(n))"
+  askYesNoQuestion(question, onDownloadMissingScriptsAccept, onDownloadMissingScriptsRefuse)
+
+end
 
 
 -------------------------------------------------------------
