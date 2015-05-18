@@ -278,7 +278,7 @@ function onUpdateAllRefuse()
 
     local question = "Do you want to update: " ..outdatedScripts[i].. " (" ..localScriptListParsed[outdatedScripts[i]].scriptVersion.. " -> " ..remoteScriptListParsed[outdatedScripts[i]].scriptVersion.. ")"
     askYesNoQuestion(question, function() updateScript(outdatedScripts[i]) end,
-                               function() print("Update for " ..outdatedScripts[i].. " has been skipped."))
+                               function() print("Update for " ..outdatedScripts[i].. " has been skipped.") end)
 
   end
 
