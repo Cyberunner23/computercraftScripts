@@ -344,7 +344,6 @@ function onUpdateRefused()
 end
 
 
-
 local outdatedScripts = {}
 
 print("Checking for updates...")
@@ -367,10 +366,97 @@ if #outdatedScripts ~= 0 then
 else
   print("All installed scripts are up to date!\n")
 end
- 
---TODO: Show list of available scripts ans prompt user for which one is wanted.
 
 
+-------------------------------------------------------------
+-- Show user Available Packages And install Them If Wanted --
+-------------------------------------------------------------
+
+function askCustomQuestion(question, answer1, answer2, answer1Action, answer2Action)
+
+  while true do
+
+    local input = read()
+
+    if string.lower(input) == answer1 then
+      answer1Action()
+      break
+    elseif string.lower(input) == answer2 then
+      answer2Action()
+      break
+    else
+      print("Please enter a valid option.")
+    end
+
+  end
+
+end
+
+function onInstall()
+
+  print("Here is the list of available scripts: ")
+
+  for i = 1, #remotePackageList do
+    print(remoteScriptList[i]["scriptName"].. "  (Version: " ..remoteScriptList[i]["scriptVersion"].. ")")
+  end
+
+  while true do
+
+    print("\nPlease enter the name of the package you wish to install.")
+
+    local input = read()
+
+    for i = 1, #remotePackageList do
+      if string.lower(input) == string.lower(remotePackageList[1]["scriptName"]) then
+        downloadScript(remotePackageList[1]["scriptName"])
+        break
+      end
+    end
+
+    print("Please enter a valid script name.")
+
+  end
+
+  local question = "Do you want to install another script? (yes(y) / no(n))"
+  askYesNoQuestion(question, function() onInstall() end, function() end)
+
+end
+
+function onUninstall()
+
+  print("Here is the list of installed packages:")
+
+  for i = 1, #remotePackageList do
+      print(installedScripts[i]["scriptName"].. "  (Version: " ..installedScripts[i]["localVersion"].. ")")
+  end
+
+  while true do
+
+    print("\nPlease enter the name of the package you wish to uninstall.")
+
+    local input = read()
+
+    for i = 1, #remotePackageList do
+      if string.lower(input) == string.lower(remotePackageList[1]["scriptName"]) then
+        print("Uninstalling script...")
+        deleteScript(remotePackageList[1]["scriptName"])
+        print("Done.\n")
+        break
+      end
+    end
+
+    print("Please enter a valid script name.")
+
+  end
+
+  local question = "Do you want to uninstall another script? (yes(y) / no(n))"
+  askYesNoQuestion(question, function() onUninstall() end, function() end)
+
+end
+
+
+local question = "Would you like to install or uninstall a script? (install / uninstall)"
+askCustomQuestion(question, "install", "uninstall", onInstall, onUninstall)
 
 
 
