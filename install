@@ -47,7 +47,8 @@ end
 function removeScriptFromLocalScriptList(scriptName)
   for i = 1, #localScriptList do
     if localScriptList[i]["scriptName"] == scriptName then
-    table.remove(localScriptList, i)
+      table.remove(localScriptList, i)
+    end
   end
   writeScriptList(localScriptList)
 end
