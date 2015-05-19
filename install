@@ -348,7 +348,7 @@ local outdatedScripts = {}
 
 print("Checking for updates...")
 
-for i = 1, #installedScripts then
+for i = 1, #installedScripts do
   if installedScripts[i]["remoteVersion"] > installedScripts[i]["localVersion"] then
     table.insert(outdatedScripts, installedScripts[i])
   end
