@@ -119,10 +119,6 @@ end
 ------------------- Build Lists -------------------
 ---------------------------------------------------
 
-getRemoteScriptList()
-getLocalScriptList()
-buildInstalledScriptsList()
-
 
 function getRemoteScriptList()
 
@@ -198,6 +194,11 @@ function buildInstalledScriptsList()
   print("Done.\n")
 
 end
+
+
+getRemoteScriptList()
+getLocalScriptList()
+buildInstalledScriptsList()
 
 
 ---------------------------------------------------
