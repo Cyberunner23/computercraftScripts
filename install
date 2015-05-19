@@ -129,8 +129,6 @@ end
 
 function getRemoteScriptList()
 
-  print("Downloading remote script list...")
-
   local remoteScriptListHandle = http.get(remoteScriptListLink)
   if not remoteScriptListHandle then
     error("Could not download the script list from the repo. Exiting...")
@@ -138,13 +136,9 @@ function getRemoteScriptList()
 
   remoteScriptList = parseScriptList(remoteScriptListHandle)
 
-  print("Done.\n")
-
 end
 
 function getLocalScriptList()
-
-  print("Reading local script list...")
 
   --Check if the dir exists, if not make one
   if not fs.isDir("ScriptList") then
@@ -166,13 +160,9 @@ function getLocalScriptList()
 
   localScriptListParsed = parseScriptList(fileHandle)
 
-  print("Done.\n")
-
 end
 
 function buildInstalledScriptsList()
-
-  print("Building installed script list...")
 
   for i = 1, #localScriptList do
 
@@ -198,14 +188,33 @@ function buildInstalledScriptsList()
 
   end
 
+end
+
+function buildScriptLists()
+
+  print("Downloading remote script list...")
+  getRemoteScriptList()
+  print("Done.\n")
+
+  print("Reading local script list...")
+  getLocalScriptList()
+  print("Done.\n")
+
+  print("Building installed script list...")
+  buildInstalledScriptsList()
   print("Done.\n")
 
 end
 
+function rebuildScriptLists()
+  print("Rebuilding script lists...")
+  getRemoteScriptList()
+  getLocalScriptList()
+  buildInstalledScriptsList()
+  print("Done...\n")
+end
 
-getRemoteScriptList()
-getLocalScriptList()
-buildInstalledScriptsList()
+
 
 
 ---------------------------------------------------
@@ -290,14 +299,15 @@ end
 
 
 -------------------------------------------------------------
--- Check If There Is A Difference Between Local And Remote --
+------------- Check For Missing Remote Packages -------------
 -------------------------------------------------------------
 
+-- TODO?: Do something with missing remote Scripts?
 
 
-
-
-local outdatedScripts = {}
+-------------------------------------------------------------
+-- Check If There Is A Difference Between Local And Remote --
+-------------------------------------------------------------
 
 
 function onUpdateAccept()
@@ -314,7 +324,7 @@ function onUpdateAllAccept()
   print("Updating all scripts...")
 
   for i = 1, #outdatedScripts do
-    updateScript(outdatedScripts[i])
+    updateScript(outdatedScripts[i]["scriptName"])
   end
 
 end
@@ -324,22 +334,24 @@ function onUpdateAllRefuse()
   for i = 1, #outdatedScripts do
 
     local question = "Do you want to update: " ..outdatedScripts[i].. " (" ..localScriptListParsed[outdatedScripts[i]].scriptVersion.. " -> " ..remoteScriptListParsed[outdatedScripts[i]].scriptVersion.. ")"
-    askYesNoQuestion(question, function() updateScript(outdatedScripts[i]) end, function() print("Update for " ..outdatedScripts[i].. " has been skipped.") end)
+    askYesNoQuestion(question, function() updateScript(outdatedScripts[i]["scriptName"]) end, function() print("Update for " ..outdatedScripts[i]["scriptName"].. " has been skipped.") end)
   end
 
 end
-
 
 function onUpdateRefused()
   print("Skipping updates.")
 end
 
 
+
+local outdatedScripts = {}
+
 print("Checking for updates...")
 
-for k, v in pairs(remoteScriptList) do
-  if localScriptListParsed[k] == nil or localScriptListParsed[k].scriptVersion < remoteScriptListParsed[k].scriptVersion then
-    table.insert(outdatedScripts, k)
+for i = 1, #installedScripts then
+  if installedScripts[i]["remoteVersion"] > installedScripts[i]["localVersion"] then
+    table.insert(outdatedScripts, installedScripts[i])
   end
 end
 
@@ -347,13 +359,13 @@ if #outdatedScripts ~= 0 then
 
   print("Updates are available. Here is the list of updates: ")
   for i = 1, #outdatedScripts do
-    print(outdatedScripts[i].. " (" ..localScriptListParsed[outdatedScripts[i]].scriptVersion.. " -> " ..remoteScriptListParsed[outdatedScripts[i]].scriptVersion.. ")")
+    print(outdatedScripts[i]["scriptName"].. " (" ..outdatedScripts[i]["localVersion"].. " -> " ..outdatedScripts[i]["remoteVersion"].. ")")
   end
 
   local question = "Do you wan to update the scripts?"
   askYesNoQuestion(question, onUpdateAccept, onUpdateRefused)
 else
-  print("All installed scripts are up to date!")
+  print("All installed scripts are up to date!\n")
 end
  
 --TODO: Show list of available scripts ans prompt user for which one is wanted.
