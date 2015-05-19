@@ -27,11 +27,32 @@ function RegButton(BList, BTitle, CBack, XPos, YPos, Width, Height, TColor, BGCo
 end
 
 function CheckClick(BList, ClkX, ClkY)
-  for local i = 1, #BList do
+  for i = 1, #BList do
     if ClkX >= BList[i].XPos and ClkY >= BList[i].YPos and ClkX <= BList[i].XEnd and ClkY <= BList[i].YEnd then
-      return true
-    else
-      return false
+      BList[i].CBack()
+    end
+  end
+end
+
+function RenderButton(BList)
+local termX, termY = term.getSize()
+  for i = 1, #BList do
+    CurB = BList[i]
+    term.setTextColor(CurB.TColor)
+    term.setBackgroundColor(CurB.BGColor)
+    term.setCursorPos(CurB.XPos, CurB.YPos)
+    for h = 1, CurB.Height do
+      if CurB.YPos + h > termY then 
+        break
+      end
+      for w = 1, CurB.Width do
+        if CurB.XPos + w > termX then
+          break
+        end
+        term.setCursorPos(CurB.XPos + w, CurB.YPos + h)
+        term.write(" ")
+      end
+      
     end
   end
 end
