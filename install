@@ -25,29 +25,31 @@ function parseScriptList(scriptListHandle)
   return scriptListParsed
 end
 
-function writeScriptList(parsedScriptList)
+function writeScriptList(scriptList)
 
   local fileHandle = fs.open("ScriptList/ScriptList.txt", "w")
   if fileHandle == nil then
     error("Could not open the local script list for writing. Something went very bad. Exiting...")
   end
 
-  for k,v in pairs(parsedScriptList) do
-    fileHandle.write(parsedScriptList[k])
-    fileHandle.write(parsedScriptList[k].version)
+  for i = 1, #scriptList do
+    fileHandle.write(scriptList[i]["scriptName"])
+    fileHandle.write(scriptList[i]["scriptVersion"])
   end
 
 end
 
 function addScriptToLocalScriptList(scriptName, scriptVersion)
-  localScriptListParsed[scriptName] = {}
-  localScriptListParsed[scriptName].scriptVersion = scriptVersion
-  writeScriptList(localScriptListParsed)
+  table.insert(localScriptList, {["scriptName"] = scriptName, ["scriptVersion"] = scriptVersion})
+  writeScriptList(localScriptList)
 end
 
 function removeScriptFromLocalScriptList(scriptName)
-  localScriptListParsed[scriptName] = nil
-  writeScriptList(localScriptListParsed)
+  for i = 1, #localScriptList do
+    if localScriptList[i]["scriptName"] == scriptName then
+    table.remove(localScriptList, i)
+  end
+  writeScriptList(localScriptList)
 end
 
 function downloadScriptRaw(scriptName)
@@ -240,7 +242,7 @@ end
 
 --function onDownloadAllMissingScriptsAccepted()
 --  for i = 1, #missingScripts do
---    removeScriptFromLocalScriptList(missingScripts[i]) -- dat typo doe
+--    removeScriptFromLocalScriptList(missingScripts[i])
 --    downloadScript(missingScripts[i])
 --  end
 --end
@@ -343,7 +345,7 @@ end
 
 print("Checking for updates...")
 
-for k, v in pairs(remoteScriptListParsed) do
+for k, v in pairs(remoteScriptList) do
   if localScriptListParsed[k] == nil or localScriptListParsed[k].scriptVersion < remoteScriptListParsed[k].scriptVersion then
     table.insert(outdatedScripts, k)
   end
