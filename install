@@ -77,9 +77,13 @@ function downloadScriptRaw(scriptName)
 
 end
 
-function downloadScript(scriptName)
+function downloadScript(scriptName)------
   downloadScriptRaw(scriptName)
-  addScriptToLocalScriptList(scriptName, remoteScriptListParsed[scriptName].scriptVersion)
+  for i = 1, #remoteScriptList do
+    if remoteScriptList[i]["scriptName"] == scriptName then
+      addScriptToLocalScriptList(scriptName, remoteScriptList[i]["scriptVersion"])
+    end
+  end
 end
 
 function deleteScript(scriptName)
@@ -208,6 +212,60 @@ buildInstalledScriptsList()
 --------- Check For Missing Local Scripts ---------
 ---------------------------------------------------
 
+function onDownloadMissingScriptsAccept()
+  local question = "Download all missing scripts? (yes(y) / no(n))"
+  askYesNoQuestion(question, onDownloadAllMissingScriptsAccepted, onDownloadAllMissingScriptsRefused)
+end
+
+function onDownloadMissingScriptsRefuse()
+  local question = "Do you want to remove all the scripts from the local script list?"
+  --askYesNoQuestion(question, onRemoveAllScriptsFromLocalListAccept, onRemoveAllScriptsFromLocalListRefused)
+end
+
+function onDownloadAllMissingScriptsAccepted()
+  for i = 1, #missingScripts do
+    removeScriptFromLocalScriptList(missingScripts[i]["scriptName"])
+    downloadScript(missingScripts[i]["scriptName"])
+  end
+end
+
+function onDownloadAllMissingScriptsRefused()
+
+  for i = 1, #missingScripts do
+
+    question = "Would you like to download: " + missingScript[i] + " ? (yes(y) / no(n)"
+    askYesNoQuestion(question, function()
+                                 removeScriptFromLocalScriptList(missingScripts[i]["scriptName"])
+                                 downloadScript(missingScripts[i]["scriptName"])
+                               end,
+                               function()
+                                 local question = "Remove it from the local script list? (yes(y) / no(n)"
+                                 askYesNoQuestion(question, function() removeScriptFromLocalScriptList(missingScripts[i]["scriptName"]) end, function() end)
+                               end)
+
+  end
+
+end
+
+function onRemoveAllScriptsFromLocalListAccept()
+  for i = 1, #missingScripts do
+    removeScriptFromLocalScriptList(missingScripts[i]["scriptName"])
+  end
+end
+
+function onRemoveAllScriptsFromLocalListRefused()
+
+  for i = 1, #missingScripts do
+
+    question = "Would you like to remove: " + missingScript[i]["scriptName"] + " from the local script list? (yes(y) / no(n)"
+    askYesNoQuestion(question, function() removeScriptFromLocalScriptList(missingScripts[i]["scriptName"]) end,
+                               function() end)
+
+  end
+
+end
+
+
 local missingScripts = {}
 
 for i = 1, #installedScripts do
@@ -231,80 +289,13 @@ if #missingScripts ~= 0 then
 end
 
 
-function onDownloadMissingScriptsAccept()
-  local question = "Download all missing scripts? (yes(y) / no(n))"
-  --askYesNoQuestion(question, onDownloadAllMissingScriptsAccepted, onDownloadAllMissingScriptsRefused)
-end
-
-function onDownloadMissingScriptsRefuse()
-  local question = "Do you want to remove all the scripts from the local script list?"
-  --askYesNoQuestion(question, onRemoveAllScriptsFromLocalListAccept, onRemoveAllScriptsFromLocalListRefused)
-end
-
---function onDownloadAllMissingScriptsAccepted()
---  for i = 1, #missingScripts do
---    removeScriptFromLocalScriptList(missingScripts[i])
---    downloadScript(missingScripts[i])
---  end
---end
-
---function onDownloadAllMissingScriptsRefused()
---
---  for i = 1, #missingScripts do
---
---    question = "Would you like to download: " + missingScript[i] + " ? (yes(y) / no(n)"
---    askYesNoQuestion(question, function()
---                                 removeScriptFromLocalScriptList(missingScript[i])
---                                 downloadScript(missingScripts[i])
---                               end,
---                               function()
---                                 local question = "Remove it from the local script list? (yes(y) / no(n)"
---                                 askYesNoQuestion(question, function() removeScriptFromLocalScriptList(missingScript[i]) end, function() end)
---                               end)
---
---  end
---
---end
---
---
-
---
---function onRemoveAllScriptsFromLocalListAccept()
---  for i = 1, #missingScripts do
---    removeScriptFromLocalScriptList(missingScripts[i])
---  end
---end
---
---function onRemoveAllScriptsFromLocalListRefused()
---
---  for i = 1, #missingScripts do
---
---    question = "Would you like to remove: " + missingScript[i] + " from the local script list? (yes(y) / no(n)"
---    askYesNoQuestion(question, function() removeScriptFromLocalScriptList(missingScripts[i]) end,
---                               function() end)
---
---  end
---
---end
-
-
-
---thi is redundant, the check I jsut wrote takes care of this what check?
-if #missingScripts ~= 0 then
-
-  for i = 1, #missingScripts do
-    print(missingScripts[i])
-  end
-
-
-  local question = "Do you want to download the missing scripts? (This may result in the scripts being also updated.) (yes(y) / no(n))"
-  askYesNoQuestion(question, onDownloadMissingScriptsAccept, onDownloadMissingScriptsRefuse)
-end
-
-
 -------------------------------------------------------------
 -- Check If There Is A Difference Between Local And Remote --
 -------------------------------------------------------------
+
+
+
+
 
 local outdatedScripts = {}
 
