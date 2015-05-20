@@ -411,9 +411,11 @@ function onInstall()
     local isScriptFound = false
 
     local isScriptInstalled = false
+    local isScriptAlreadyInstalled = false
     for i = 1, #localScriptList do
       if string.lower(input) == string.lower(localScriptList[i]["scriptName"]) then
         isScriptInstalled = true
+        isScriptAlreadyInstalled = true
       end
     end
 
@@ -431,7 +433,9 @@ function onInstall()
     end
 
     if isScriptInstalled then
-      break
+      if not isScriptAlreadyInstalled then
+        break
+      end
     else
       print("Please enter a valid script name.")
     end
