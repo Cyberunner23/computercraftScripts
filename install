@@ -281,7 +281,7 @@ function onRemoveAllScriptsFromLocalListRefused()
 end
 
 
-local missingScripts = {}
+missingScripts = {}
 
 for i = 1, #installedScripts do
   if installedScripts[i]["isLocalScriptMissing"] then
@@ -299,7 +299,7 @@ if #missingScripts ~= 0 then
   end
 
   local question = "Would you like to download the missing scripts? (yes(y) / no(n))"
-  askYesNoQuestion(question, onDownloadMissingScriptsAccept,onDownloadMissingScriptsRefused)
+  askYesNoQuestion(question, onDownloadMissingScriptsAccept, onDownloadMissingScriptsRefused)
 
 end
 
@@ -454,7 +454,7 @@ end
 
 function onUninstall()
 
-  print("Here is the list of installed packages:")
+  print("Here is the list of installed scripts: \n")
 
   for i = 1, #localScriptList do
       print(installedScripts[i]["scriptName"].. "  (Version: " ..installedScripts[i]["localVersion"].. ")")
