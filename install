@@ -374,6 +374,8 @@ end
 
 function askCustomQuestion(question, answer1, answer2, answer1Action, answer2Action)
 
+  print(question)
+
   while true do
 
     local input = read()
