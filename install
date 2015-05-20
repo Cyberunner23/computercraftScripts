@@ -411,8 +411,7 @@ function onInstall()
 
     for i = 1, #remoteScriptList do
       if string.lower(input) == string.lower(remoteScriptList[i]["scriptName"]) then
-        downloadScriptRaw(remoteScriptList[i]["scriptName"])
-        addScriptToLocalScriptList(remoteScriptList[i]["scriptName"], remoteScriptList[i]["scriptVersion"])
+        downloadScript(remoteScriptList[i]["scriptName"])
         isScriptFound = true
         break
       end
