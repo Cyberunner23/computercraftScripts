@@ -410,27 +410,27 @@ function onInstall()
     local input         = read()
     local isScriptFound = false
 
-    local isScriptAlreadyInstalled = false
+    local isScriptInstalled = false
     for i = 1, #localScriptList do
       if string.lower(input) == string.lower(localScriptList[i]["scriptName"]) then
-        isScriptAlreadyInstalled = true
+        isScriptInstalled = true
       end
     end
 
-    if isScriptAlreadyInstalled then
+    if isScriptInstalled then
       print("This script is already installed! Please try with another script.")
     else
       for i = 1, #remoteScriptList do
         if string.lower(input) == string.lower(remoteScriptList[i]["scriptName"]) then
           downloadScript(remoteScriptList[i]["scriptName"])
           rebuildScriptLists()
-          isScriptFound = true
+          isScriptInstalled = true
           break
         end
       end
     end
 
-    if isScriptFound then
+    if isScriptInstalled then
       break
     else
       print("Please enter a valid script name.")
