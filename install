@@ -33,7 +33,7 @@ function writeScriptList(scriptList)
   end
 
   for i = 1, #scriptList do
-    fileHandle.write(scriptList[i]["scriptName"].. "\n" ..scriptList[i]["scriptVersion"])
+    fileHandle.write(scriptList[i]["scriptName"].. "\n" ..scriptList[i]["scriptVersion"] .."\n")
   end
 
   fileHandle.close()
@@ -410,11 +410,23 @@ function onInstall()
     local input         = read()
     local isScriptFound = false
 
-    for i = 1, #remoteScriptList do
-      if string.lower(input) == string.lower(remoteScriptList[i]["scriptName"]) then
-        downloadScript(remoteScriptList[i]["scriptName"])
-        isScriptFound = true
-        break
+    local isScriptAlreadyInstalled = false
+    for i = 1, #localScriptList do
+      if string.lower(input) == string.lower(localScriptList[i]["scriptName"]) then
+        isScriptAlreadyInstalled = true
+      end
+    end
+
+    if isScriptAlreadyInstalled then
+      print("This script is already installed! Please try with another script.")
+    else
+      for i = 1, #remoteScriptList do
+        if string.lower(input) == string.lower(remoteScriptList[i]["scriptName"]) then
+          downloadScript(remoteScriptList[i]["scriptName"])
+          rebuildScriptLists()
+          isScriptFound = true
+          break
+        end
       end
     end
 
