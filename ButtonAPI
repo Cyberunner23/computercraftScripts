@@ -1,58 +1,69 @@
---[[ 
-  Made By: Jerimo
-  
-  RegButton makes a button and adds it to the 
-  supplied table, in the format that CheckClick 
-  uses.
-    RegButton(Button list, Button Title, callback 
-    function, X position, Y position, width, 
-    height, Text color, BackGround Color)
-      Returns true if the button was added
-  CheckClick takes the button list, and the x and 
-  y position of the click and checks against the 
-  list
-    CheckClick(Button list, Click X position, 
-    Click Y position)
-      Returns the function of the button that was 
-      touched, or false
---]]
-
+--[[
+      Made By: Jerimo
+     
+      RegButton makes a button and adds it to the
+      supplied table, in the format that CheckClick
+      uses.
+        RegButton(Button list, Button Title, callback
+        function, X position, Y position, width,
+        height, Text color, BackGround Color)
+          Returns true if the button was added
+      CheckClick takes the button list, and the x and
+      y position of the click and checks against the
+      list
+        CheckClick(Button list, Click X position,
+        Click Y position)
+          Returns the function of the button that was
+          touched, or false
+    --]]
+     
 function RegButton(BList, BTitle, CBack, XPos, YPos, Width, Height, TColor, BGColor)
-  CurButton = {}
-  CurButton.Title, CurButton.CBack, CurButton.XPos, CurButton.YPos, CurButton.Width, CurButton.Height, CurButton.TColor, CurButton.BGColor = BTitle, CBack, XPos, YPos, Width, Height, TColor, BGColor
-  CurButton.XEnd, CurButton.YEnd = CurButton.XPos + CurButton.Width, CurButton.YPos + CurButton.Height
-  table.insert(BList, CurButton)
-  CurButton = nil
-  return true
+	CurButton = {} CurButton.Pos = {} CurButton.Pos.End = {} CurButton.Title = {} CurButton.Title.Start = {} CurButton.Title.End = {}
+	CurButton.Title.Title = BTitle CurButton.CBack = CBack CurButton.Pos.X = XPos CurButton.Pos.Y = YPos CurButton.Width = Width CurButton.Height = Height CurButton.TColor = TColor CurButton.BGColor = BGColor
+	CurButton.Pos.End.X, CurButton.Pos.End.Y = CurButton.Pos.X + CurButton.Width - 1, CurButton.Pos.Y + CurButton.Height - 1
+	CurButton.Title.Display = string.sub(CurButton.Title.Title, 1, CurButton.Width - 2)
+	CurButton.Title.Length = string.len(CurButton.Title.Display)
+	CurButton.Title.Start.X = math.floor((CurButton.Width/2+CurButton.Pos.X) - (CurButton.Title.Length/2))
+	CurButton.Title.End.X = CurButton.Title.Start.X + CurButton.Title.Length - 1
+	CurButton.Title.Start.Y = math.floor(CurButton.Height/2+CurButton.Pos.Y)
+	table.insert(BList, CurButton)
+	CurButton = nil
+	return true
 end
-
+     
 function CheckClick(BList, ClkX, ClkY)
-  for i = 1, #BList do
-    if ClkX >= BList[i].XPos and ClkY >= BList[i].YPos and ClkX <= BList[i].XEnd and ClkY <= BList[i].YEnd then
-      BList[i].CBack()
-    end
-  end
+	for i = 1, #BList do
+		if ClkX >= BList[i].Pos.X and ClkY >= BList[i].Pos.Y and ClkX <= BList[i].Pos.End.X and ClkY <= BList[i].Pos.End.Y then
+			BList[i].CBack()
+		end
+	end
 end
-
+     
 function RenderButton(BList)
-local termX, termY = term.getSize()
-  for i = 1, #BList do
-    CurB = BList[i]
-    term.setTextColor(CurB.TColor)
-    term.setBackgroundColor(CurB.BGColor)
-    term.setCursorPos(CurB.XPos, CurB.YPos)
-    for h = 1, CurB.Height do
-      if CurB.YPos + h > termY then 
-        break
-      end
-      for w = 1, CurB.Width do
-        if CurB.XPos + w > termX then
-          break
-        end
-        term.setCursorPos(CurB.XPos + w, CurB.YPos + h)
-        term.write(" ")
-      end
-      
-    end
-  end
+	local termX, termY = term.getSize()
+		for i = 1, #BList do
+			CurB = BList[i]
+			term.setTextColor(CurB.TColor)
+			term.setBackgroundColor(CurB.BGColor)
+			for h = CurB.Pos.Y, CurB.Pos.End.Y do
+				if h > termY then
+					break
+				else
+					term.setCursorPos(CurB.Pos.X, h)
+				end
+				for w = CurB.Pos.X, CurB.Pos.End.X do
+					if w > termX then
+						break
+					end
+					if w >= CurB.Title.Start.X and w <= CurB.Title.End.X and h == CurB.Title.Start.Y then
+						if w == CurB.Title.Start.X then
+							term.write(CurB.Title.Display)
+						end
+					else
+						term.write(" ")
+					end
+				end
+			end
+		end
+	end
 end
