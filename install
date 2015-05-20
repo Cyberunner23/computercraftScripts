@@ -454,7 +454,7 @@ end
 
 function onUninstall()
 
-  if #installedScripts == 0
+  if #installedScripts == 0 then
     local question = "There are no scripts installed, do you want to install some? (yes(y) / no(n))"
     askYesNoQuestion(question, function() onInstall end, function() print("Exiting...") end)
   else
