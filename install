@@ -158,7 +158,7 @@ function getLocalScriptList()
     error("Could not open the local script list. Something went horribly wrong. Exiting...")
   end
 
-  localScriptListParsed = parseScriptList(fileHandle)
+  localScriptList = parseScriptList(fileHandle)
 
 end
 
@@ -333,7 +333,7 @@ function onUpdateAllRefuse()
 
   for i = 1, #outdatedScripts do
 
-    local question = "Do you want to update: " ..outdatedScripts[i].. " (" ..localScriptListParsed[outdatedScripts[i]].scriptVersion.. " -> " ..remoteScriptListParsed[outdatedScripts[i]].scriptVersion.. ")"
+    local question = "Do you want to update: " ..outdatedScripts[i]["scriptName"].. " (" ..outdatedScripts[i]["localVersion"].. " -> " ..outdatedScripts[i]["remoteVersion"].. ")"
     askYesNoQuestion(question, function() updateScript(outdatedScripts[i]["scriptName"]) end, function() print("Update for " ..outdatedScripts[i]["scriptName"].. " has been skipped.") end)
   end
 
