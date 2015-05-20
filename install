@@ -223,8 +223,13 @@ buildScriptLists()
 ---------------------------------------------------
 
 function onDownloadMissingScriptsAccept()
-  local question = "Download all missing scripts? (yes(y) / no(n))"
-  askYesNoQuestion(question, onDownloadAllMissingScriptsAccepted, onDownloadAllMissingScriptsRefused)
+  if #missingScripts > 1 then
+    local question = "Download all missing scripts? (yes(y) / no(n))"
+      askYesNoQuestion(question, onDownloadAllMissingScriptsAccepted, onDownloadAllMissingScriptsRefused)
+  else
+    onDownloadAllMissingScriptsAccepted()
+  end
+
 end
 
 function onDownloadMissingScriptsRefuse()
