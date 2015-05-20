@@ -349,7 +349,7 @@ local outdatedScripts = {}
 print("Checking for updates...")
 
 for i = 1, #installedScripts do
-  if installedScripts[i]["remoteVersion"] > installedScripts[i]["localVersion"] then
+  if tonumber(installedScripts[i]["remoteVersion"]) > tonumber(installedScripts[i]["localVersion"]) then
     table.insert(outdatedScripts, installedScripts[i])
   end
 end
@@ -434,7 +434,7 @@ function onUninstall()
 
   print("Here is the list of installed packages:")
 
-  for i = 1, #local ScriptList do
+  for i = 1, #localScriptList do
       print(installedScripts[i]["scriptName"].. "  (Version: " ..installedScripts[i]["localVersion"].. ")")
   end
 
