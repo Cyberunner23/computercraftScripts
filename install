@@ -493,8 +493,6 @@ function onUninstall()
     local question = "Do you want to uninstall another script? (yes(y) / no(n))"
     askYesNoQuestion(question, function() onUninstall() end, function() end)
 
-    end
-
   end
 
 end
