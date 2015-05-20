@@ -444,10 +444,10 @@ function onUninstall()
 
     local input = read()
 
-    for i = 1, #remotePackageList do
+    for i = 1, #remoteScriptList do
       if string.lower(input) == string.lower(remotePackageList[1]["scriptName"]) then
         print("Uninstalling script...")
-        deleteScript(remotePackageList[1]["scriptName"])
+        deleteScript(remoteScriptList[1]["scriptName"])
         print("Done.\n")
         break
       end
