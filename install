@@ -228,7 +228,7 @@ end
 
 function onDownloadMissingScriptsRefuse()
   local question = "Do you want to remove all the scripts from the local script list?"
-  --askYesNoQuestion(question, onRemoveAllScriptsFromLocalListAccept, onRemoveAllScriptsFromLocalListRefused)
+  askYesNoQuestion(question, onRemoveAllScriptsFromLocalListAccept, onRemoveAllScriptsFromLocalListRefused)
 end
 
 function onDownloadAllMissingScriptsAccepted()
@@ -434,7 +434,7 @@ function onUninstall()
 
   print("Here is the list of installed packages:")
 
-  for i = 1, #remotePackageList do
+  for i = 1, #local ScriptList do
       print(installedScripts[i]["scriptName"].. "  (Version: " ..installedScripts[i]["localVersion"].. ")")
   end
 
