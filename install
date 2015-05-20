@@ -168,7 +168,7 @@ function buildInstalledScriptsList()
 
     local scriptName            = localScriptList[i]["scriptName"]
     local remoteVersion         = nil
-    local localVersion          = localScriptList[i]["ScriptVersion"]
+    local localVersion          = localScriptList[i]["scriptVersion"]
     local isRemoteScriptMissing = nil
     local isLocalScriptMissing  = nil
 
