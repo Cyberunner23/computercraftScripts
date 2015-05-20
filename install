@@ -398,7 +398,7 @@ function onInstall()
 
   print("Here is the list of available scripts: ")
 
-  for i = 1, #remotePackageList do
+  for i = 1, #remoteScriptList do
     print(remoteScriptList[i]["scriptName"].. "  (Version: " ..remoteScriptList[i]["scriptVersion"].. ")")
   end
 
