@@ -460,6 +460,7 @@ function onUninstall()
       print(installedScripts[i]["scriptName"].. "  (Version: " ..installedScripts[i]["localVersion"].. ")")
   end
 
+  local isAScriptUninstalled = false
   while true do
 
     print("\nPlease enter the name of the package you wish to uninstall.")
@@ -470,12 +471,17 @@ function onUninstall()
       if string.lower(input) == string.lower(remoteScriptList[1]["scriptName"]) then
         print("Uninstalling script...")
         deleteScript(remoteScriptList[1]["scriptName"])
+        isAScriptUninstalled = true
         print("Done.\n")
         break
       end
     end
 
-    print("Please enter a valid script name.")
+    if isAScriptUninstalled then
+      break
+    else
+      print("Please enter a valid script name.")
+    end
 
   end
 
