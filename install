@@ -454,42 +454,50 @@ end
 
 function onUninstall()
 
-  print("Here is the list of installed scripts: \n")
+  if #installedScripts == 0
+    local question = "There are no scripts installed, do you want to install some? (yes(y) / no(n))"
+    askYesNoQuestion(question, function() onInstall end, function() print("Exiting...") end)
+  else
 
-  for i = 1, #localScriptList do
-      print(installedScripts[i]["scriptName"].. "  (Version: " ..installedScripts[i]["localVersion"].. ")")
-  end
+    print("Here is the list of installed scripts: \n")
 
-  local isAScriptUninstalled = false
-  while true do
+    for i = 1, #localScriptList do
+        print(installedScripts[i]["scriptName"].. "  (Version: " ..installedScripts[i]["localVersion"].. ")")
+    end
 
-    print("\nPlease enter the name of the package you wish to uninstall.")
+    local isAScriptUninstalled = false
+    while true do
 
-    local input = read()
+      print("\nPlease enter the name of the package you wish to uninstall.")
 
-    for i = 1, #remoteScriptList do
-      if string.lower(input) == string.lower(remoteScriptList[1]["scriptName"]) then
-        print("Uninstalling script...")
-        deleteScript(remoteScriptList[1]["scriptName"])
-        isAScriptUninstalled = true
-        print("Done.\n")
-        break
+      local input = read()
+
+      for i = 1, #remoteScriptList do
+        if string.lower(input) == string.lower(remoteScriptList[1]["scriptName"]) then
+          print("Uninstalling script...")
+          deleteScript(remoteScriptList[1]["scriptName"])
+          isAScriptUninstalled = true
+          print("Done.\n")
+          break
+        end
       end
+
+      if isAScriptUninstalled then
+        break
+      else
+        print("Please enter a valid script name.")
+      end
+
     end
 
-    if isAScriptUninstalled then
-      break
-    else
-      print("Please enter a valid script name.")
+    local question = "Do you want to uninstall another script? (yes(y) / no(n))"
+    askYesNoQuestion(question, function() onUninstall() end, function() end)
+
     end
 
   end
-
-  local question = "Do you want to uninstall another script? (yes(y) / no(n))"
-  askYesNoQuestion(question, function() onUninstall() end, function() end)
 
 end
-
 
 local question = "Would you like to install or uninstall a script? (install / uninstall)"
 askCustomQuestion(question, "install", "uninstall", onInstall, onUninstall)
