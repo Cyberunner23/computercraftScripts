@@ -33,7 +33,7 @@ function writeScriptList(scriptList)
   end
 
   for i = 1, #scriptList do
-    fileHandle.write(scriptList[i]["scriptName"].. "\n" ..fileHandle.write(scriptList[i]["scriptVersion"]))
+    fileHandle.write(scriptList[i]["scriptName"].. "\n" ..scriptList[i]["scriptVersion"])
   end
 
   fileHandle.close()
