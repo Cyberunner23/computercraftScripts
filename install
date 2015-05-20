@@ -406,16 +406,22 @@ function onInstall()
 
     print("\nPlease enter the name of the package you wish to install.")
 
-    local input = read()
+    local input         = read()
+    local isScriptFound = false
 
     for i = 1, #remoteScriptList do
       if string.lower(input) == string.lower(remoteScriptList[1]["scriptName"]) then
         downloadScript(remoteScriptList[1]["scriptName"])
+        isScriptFound = true
         break
       end
     end
 
-    print("Please enter a valid script name.")
+    if isScriptFound then
+      break
+    else
+      print("Please enter a valid script name.")
+    end
 
   end
 
