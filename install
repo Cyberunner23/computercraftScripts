@@ -410,8 +410,8 @@ function onInstall()
     local isScriptFound = false
 
     for i = 1, #remoteScriptList do
-      if string.lower(input) == string.lower(remoteScriptList[1]["scriptName"]) then
-        downloadScript(remoteScriptList[1]["scriptName"])
+      if string.lower(input) == string.lower(remoteScriptList[i]["scriptName"]) then
+        downloadScript(remoteScriptList[i]["scriptName"])
         isScriptFound = true
         break
       end
