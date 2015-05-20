@@ -476,6 +476,7 @@ function onUninstall()
         if string.lower(input) == string.lower(remoteScriptList[1]["scriptName"]) then
           print("Uninstalling script...")
           deleteScript(remoteScriptList[1]["scriptName"])
+          rebuildScriptLists()
           isAScriptUninstalled = true
           print("Done.\n")
           break
@@ -490,8 +491,13 @@ function onUninstall()
 
     end
 
-    local question = "Do you want to uninstall another script? (yes(y) / no(n))"
-    askYesNoQuestion(question, function() onUninstall() end, function() end)
+    if #installedScripts == 0 then
+      local question = "There are no more scripts to be uninstalled, do you want to install some? (yes(y) / no(n))"
+      askYesNoQuestion(question, function() onInstall() end, function() print("Exiting...") end)
+    else
+      local question = "Do you want to uninstall another script? (yes(y) / no(n))"
+      askYesNoQuestion(question, function() onUninstall() end, function() end)
+    end
 
   end
 
