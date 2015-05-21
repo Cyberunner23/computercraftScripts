@@ -13,3 +13,6 @@ Available Scripts
 |:----------------|:---------------------------------------------------------------------------------------------------------------------|
 | installerupdater| [A small script that when executed, updates the installer (used for dev of installer)](http://pastebin.com/SpYMUWKr) |
 | install         | A simple script used to install and update scripts                                                                   |
+|                 |                                                                                                                      |
+| ButtonAPI       | A simple button API written by jerimo                                                                                |
+| control         | The control script used to control various things on the server REQUIRES: ButtonAPI                                  |
