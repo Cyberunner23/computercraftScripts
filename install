@@ -1,0 +1,520 @@
+
+-----------------------------------------------------------
+----------------------- Global Vars -----------------------
+-----------------------------------------------------------
+
+local remoteScriptListLink = "https://raw.githubusercontent.com/Cyberunner23/computercraftScripts/master/scriptList"
+local remoteScriptList     = {} -- tot {["scriptName"], ["scriptVersion"]}
+local localScriptList      = {} -- tot {["scriptName"], ["scriptVersion"]}
+local installedScripts     = {} -- tot {["scriptName"], ["remoteVersion"], ["localVersion"], ["isRemoteScriptMissing"], ["isLocalScriptMissing"]}
+
+-----------------------------------------------------------
+--------------------- Util Functions ----------------------
+-----------------------------------------------------------
+function parseScriptList(scriptListHandle)
+  scriptListParsed = {}
+  while true do
+    local scriptName = scriptListHandle.readLine()
+    --if scripName not empty then read next line and set it as version
+    if scriptName == "" or scriptName == nil then
+      break
+    else
+      table.insert(scriptListParsed, {["scriptName"] = scriptName, ["scriptVersion"] = scriptListHandle.readLine()})
+    end
+  end
+  return scriptListParsed
+end
+
+function writeScriptList(scriptList)
+
+  local fileHandle = fs.open("ScriptList/ScriptList.txt", "w")
+  if fileHandle == nil then
+    error("Could not open the local script list for writing. Something went very bad. Exiting...")
+  end
+
+  for i = 1, #scriptList do
+    fileHandle.write(scriptList[i]["scriptName"].. "\n" ..scriptList[i]["scriptVersion"] .."\n")
+  end
+
+  fileHandle.close()
+
+end
+
+function addScriptToLocalScriptList(scriptName, scriptVersion)
+  table.insert(localScriptList, {["scriptName"] = scriptName, ["scriptVersion"] = scriptVersion})
+  writeScriptList(localScriptList)
+end
+
+function removeScriptFromLocalScriptList(scriptName)
+  for i = 1, #localScriptList do
+    if localScriptList[i]["scriptName"] == scriptName then
+      table.remove(localScriptList, i)
+    end
+  end
+  writeScriptList(localScriptList)
+end
+
+function downloadScriptRaw(scriptName)
+
+  print("Downloading script...")
+
+  local scriptLink   = "https://raw.githubusercontent.com/Cyberunner23/computercraftScripts/master/" .. scriptName
+  local scriptHandle = http.get(scriptLink)
+  local scriptData   = scriptHandle.readAll()
+  local fileHandle   = nil
+
+  if not scriptData then
+    error("Could not download the script from the repo. Exiting...")
+  end
+
+  print("Done.")
+  print("Writing script...")
+
+  fileHandle = fs.open(scriptName, "w")
+  fileHandle.write(scriptData)
+  fileHandle.close()
+
+  print("Done")
+
+end
+
+function downloadScript(scriptName)------
+  downloadScriptRaw(scriptName)
+  for i = 1, #remoteScriptList do
+    if remoteScriptList[i]["scriptName"] == scriptName then
+      addScriptToLocalScriptList(scriptName, remoteScriptList[i]["scriptVersion"])
+    end
+  end
+end
+
+function deleteScript(scriptName)
+  removeScriptFromLocalScriptList(scriptName)
+  fs.delete(scriptName)
+end
+
+function updateScript(scriptName)
+  print("Deleting old version of " ..scriptName)
+  deleteScript(scriptName)
+  print("Downloading new version of " ..scriptName)
+  downloadScript(scriptName)
+  print("Done.")
+end
+
+function askYesNoQuestion(msg, yesAction, noAction)
+
+  print(msg)
+
+  while true do
+
+    local input = read()
+
+    if string.lower(input) == "yes" or string.lower(input) == "y" then
+      yesAction()
+      break
+    elseif string.lower(input) == "no" or string.lower(input) == "n" then
+      noAction()
+      break
+    else
+      print("Please enter a valid option.")
+    end
+
+  end
+
+end
+
+
+---------------------------------------------------
+------------------- Build Lists -------------------
+---------------------------------------------------
+
+
+function getRemoteScriptList()
+
+  local remoteScriptListHandle = http.get(remoteScriptListLink)
+  if not remoteScriptListHandle then
+    error("Could not download the script list from the repo. Exiting...")
+  end
+
+  remoteScriptList = parseScriptList(remoteScriptListHandle)
+
+end
+
+function getLocalScriptList()
+
+  --Check if the dir exists, if not make one
+  if not fs.isDir("ScriptList") then
+    fs.makeDir("ScriptList")
+  end
+
+  --Check if the local script list exists, if not make a blank one for now.
+  if not fs.exists("ScriptList/ScriptList.txt") then
+    print("Local script list not found... Making one.")
+    local tmpFileHandle = fs.open("ScriptList/ScriptList.txt", "w")
+    tmpFileHandle.close()
+  end
+
+  --Open and read local script list
+  local fileHandle = fs.open("ScriptList/ScriptList.txt", "r")
+  if fileHandle == nil then
+    error("Could not open the local script list. Something went horribly wrong. Exiting...")
+  end
+
+  localScriptList = parseScriptList(fileHandle)
+
+end
+
+function buildInstalledScriptsList()
+
+  for i = 1, #localScriptList do
+
+    local scriptName            = localScriptList[i]["scriptName"]
+    local remoteVersion         = nil
+    local localVersion          = localScriptList[i]["scriptVersion"]
+    local isRemoteScriptMissing = nil
+    local isLocalScriptMissing  = nil
+
+    isLocalScriptMissing = not fs.exists(localScriptList[i]["scriptName"])
+
+    local remoteScriptFound = false
+    for i = 1, #remoteScriptList do
+      if remoteScriptList[i]["scriptName"] == scriptName then
+        remoteVersion     = remoteScriptList[i]["scriptVersion"]
+        remoteScriptFound = true
+      end
+    end
+
+    isRemoteScriptMissing = not remoteScriptFound
+
+    table.insert(installedScripts, {["scriptName"] = scriptName, ["remoteVersion"] = remoteVersion, ["localVersion"] = localVersion, ["isRemoteScriptMissing"] = isRemoteScriptMissing, ["isLocalScriptMissing"] = isLocalScriptMissing})
+
+  end
+
+end
+
+function buildScriptLists()
+
+  print("Downloading remote script list...")
+  getRemoteScriptList()
+  print("Done.\n")
+
+  print("Reading local script list...")
+  getLocalScriptList()
+  print("Done.\n")
+
+  print("Building installed script list...")
+  buildInstalledScriptsList()
+  print("Done.\n")
+
+end
+
+function rebuildScriptLists()
+  print("Rebuilding script lists...")
+  getRemoteScriptList()
+  getLocalScriptList()
+  buildInstalledScriptsList()
+  print("Done...\n")
+end
+
+buildScriptLists()
+
+
+---------------------------------------------------
+--------- Check For Missing Local Scripts ---------
+---------------------------------------------------
+
+function onDownloadMissingScriptsAccept()
+  if #missingScripts > 1 then
+    local question = "Download all missing scripts? (yes(y) / no(n))"
+      askYesNoQuestion(question, onDownloadAllMissingScriptsAccepted, onDownloadAllMissingScriptsRefused)
+  else
+    onDownloadAllMissingScriptsAccepted()
+  end
+
+end
+
+function onDownloadMissingScriptsRefuse()
+  local question = "Do you want to remove all the scripts from the local script list?"
+  askYesNoQuestion(question, onRemoveAllScriptsFromLocalListAccept, onRemoveAllScriptsFromLocalListRefused)
+end
+
+function onDownloadAllMissingScriptsAccepted()
+  for i = 1, #missingScripts do
+    removeScriptFromLocalScriptList(missingScripts[i]["scriptName"])
+    downloadScript(missingScripts[i]["scriptName"])
+  end
+end
+
+function onDownloadAllMissingScriptsRefused()
+
+  for i = 1, #missingScripts do
+
+    question = "Would you like to download: " + missingScript[i] + " ? (yes(y) / no(n)"
+    askYesNoQuestion(question, function()
+                                 removeScriptFromLocalScriptList(missingScripts[i]["scriptName"])
+                                 downloadScript(missingScripts[i]["scriptName"])
+                               end,
+                               function()
+                                 local question = "Remove it from the local script list? (yes(y) / no(n)"
+                                 askYesNoQuestion(question, function() removeScriptFromLocalScriptList(missingScripts[i]["scriptName"]) end, function() end)
+                               end)
+
+  end
+
+end
+
+function onRemoveAllScriptsFromLocalListAccept()
+  for i = 1, #missingScripts do
+    removeScriptFromLocalScriptList(missingScripts[i]["scriptName"])
+  end
+end
+
+function onRemoveAllScriptsFromLocalListRefused()
+
+  for i = 1, #missingScripts do
+
+    question = "Would you like to remove: " + missingScript[i]["scriptName"] + " from the local script list? (yes(y) / no(n)"
+    askYesNoQuestion(question, function() removeScriptFromLocalScriptList(missingScripts[i]["scriptName"]) end,
+                               function() end)
+
+  end
+
+end
+
+
+missingScripts = {}
+
+for i = 1, #installedScripts do
+  if installedScripts[i]["isLocalScriptMissing"] then
+    table.insert(missingScripts, installedScripts[i])
+  end
+end
+
+if #missingScripts ~= 0 then
+
+  print("Some scripts that the local script list indicate as being installed are missing.")
+  print("Here is the list of missing scripts:")
+
+  for i = 1, #missingScripts do
+    print(missingScripts[i]["scriptName"])
+  end
+
+  local question = "Would you like to download the missing scripts? (yes(y) / no(n))"
+  askYesNoQuestion(question, onDownloadMissingScriptsAccept, onDownloadMissingScriptsRefused)
+
+end
+
+
+-------------------------------------------------------------
+------------- Check For Missing Remote Packages -------------
+-------------------------------------------------------------
+
+-- TODO?: Do something with missing remote Scripts?
+
+
+-------------------------------------------------------------
+-- Check If There Is A Difference Between Local And Remote --
+-------------------------------------------------------------
+
+
+function onUpdateAccept()
+
+  local question = "Do you want to update all scripts? (yes(y) / no(n))"
+  askYesNoQuestion(question, onUpdateAllAccept, onUpdateAllRefuse)
+
+  print("Done updating!")
+
+end
+
+function onUpdateAllAccept()
+
+  print("Updating all scripts...")
+
+  for i = 1, #outdatedScripts do
+    updateScript(outdatedScripts[i]["scriptName"])
+  end
+
+end
+
+function onUpdateAllRefuse()
+
+  for i = 1, #outdatedScripts do
+
+    local question = "Do you want to update: " ..outdatedScripts[i]["scriptName"].. " (" ..outdatedScripts[i]["localVersion"].. " -> " ..outdatedScripts[i]["remoteVersion"].. ")"
+    askYesNoQuestion(question, function() updateScript(outdatedScripts[i]["scriptName"]) end, function() print("Update for " ..outdatedScripts[i]["scriptName"].. " has been skipped.") end)
+  end
+
+end
+
+function onUpdateRefused()
+  print("Skipping updates.")
+end
+
+
+local outdatedScripts = {}
+
+print("Checking for updates...")
+
+for i = 1, #installedScripts do
+  if tonumber(installedScripts[i]["remoteVersion"]) > tonumber(installedScripts[i]["localVersion"]) then
+    table.insert(outdatedScripts, installedScripts[i])
+  end
+end
+
+if #outdatedScripts ~= 0 then
+
+  print("Updates are available. Here is the list of updates: ")
+  for i = 1, #outdatedScripts do
+    print(outdatedScripts[i]["scriptName"].. " (" ..outdatedScripts[i]["localVersion"].. " -> " ..outdatedScripts[i]["remoteVersion"].. ")")
+  end
+
+  local question = "Do you wan to update the scripts?"
+  askYesNoQuestion(question, onUpdateAccept, onUpdateRefused)
+else
+  print("All installed scripts are up to date!\n")
+end
+
+
+-------------------------------------------------------------
+-- Show user Available Packages And install Them If Wanted --
+-------------------------------------------------------------
+
+function askCustomQuestion(question, answer1, answer2, answer1Action, answer2Action)
+
+  print(question)
+
+  while true do
+
+    local input = read()
+
+    if string.lower(input) == answer1 then
+      answer1Action()
+      break
+    elseif string.lower(input) == answer2 then
+      answer2Action()
+      break
+    else
+      print("Please enter a valid option.")
+    end
+
+  end
+
+end
+
+function onInstall()
+
+  print("Here is the list of available scripts: \n")
+
+  for i = 1, #remoteScriptList do
+    print(remoteScriptList[i]["scriptName"].. "  (Version: " ..remoteScriptList[i]["scriptVersion"].. ")")
+  end
+
+  while true do
+
+    print("\nPlease enter the name of the package you wish to install.")
+
+    local input         = read()
+    local isScriptFound = false
+
+    local isScriptInstalled = false
+    local isScriptAlreadyInstalled = false
+    for i = 1, #localScriptList do
+      if string.lower(input) == string.lower(localScriptList[i]["scriptName"]) then
+        isScriptInstalled = true
+        isScriptAlreadyInstalled = true
+      end
+    end
+
+    if isScriptInstalled then
+      print("This script is already installed! Please try with another script.")
+    else
+      for i = 1, #remoteScriptList do
+        if string.lower(input) == string.lower(remoteScriptList[i]["scriptName"]) then
+          downloadScript(remoteScriptList[i]["scriptName"])
+          rebuildScriptLists()
+          isScriptInstalled = true
+          break
+        end
+      end
+    end
+
+    if isScriptInstalled then
+      if not isScriptAlreadyInstalled then
+        break
+      end
+    else
+      print("Please enter a valid script name.")
+    end
+
+  end
+
+  local question = "Do you want to install another script? (yes(y) / no(n))"
+  askYesNoQuestion(question, function() onInstall() end, function() end)
+
+end
+
+function onUninstall()
+
+  if #installedScripts == 0 then
+    local question = "There are no scripts installed, do you want to install some? (yes(y) / no(n))"
+    askYesNoQuestion(question, function() onInstall() end, function() print("Exiting...") end)
+  else
+
+    print("Here is the list of installed scripts: \n")
+
+    for i = 1, #localScriptList do
+        print(installedScripts[i]["scriptName"].. "  (Version: " ..installedScripts[i]["localVersion"].. ")")
+    end
+
+    local isAScriptUninstalled = false
+    while true do
+
+      print("\nPlease enter the name of the package you wish to uninstall.")
+
+      local input = read()
+
+      for i = 1, #remoteScriptList do
+        if string.lower(input) == string.lower(remoteScriptList[1]["scriptName"]) then
+          print("Uninstalling script...")
+          deleteScript(remoteScriptList[1]["scriptName"])
+          rebuildScriptLists()
+          isAScriptUninstalled = true
+          print("Done.\n")
+          break
+        end
+      end
+
+      if isAScriptUninstalled then
+        break
+      else
+        print("Please enter a valid script name.")
+      end
+
+    end
+
+    if #installedScripts == 0 then
+      local question = "There are no more scripts to be uninstalled, do you want to install some? (yes(y) / no(n))"
+      askYesNoQuestion(question, function() onInstall() end, function() print("Exiting...") end)
+    else
+      local question = "Do you want to uninstall another script? (yes(y) / no(n))"
+      askYesNoQuestion(question, function() onUninstall() end, function() end)
+    end
+
+  end
+
+end
+
+local question = "Would you like to install or uninstall a script? (install / uninstall)"
+askCustomQuestion(question, "install", "uninstall", onInstall, onUninstall)
+
+
+
+
+
+
+
+
+
+
+
+
+
