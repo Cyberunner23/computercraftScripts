@@ -16,3 +16,4 @@ Available Scripts
 |                 |                                                                                                                      |
 | ButtonAPI       | A simple button API written by jerimo                                                                                |
 | control         | The control script used to control various things on the server REQUIRES: ButtonAPI                                  |
+|do               | A text parser which runs functions not normally accessible in the command line      |
